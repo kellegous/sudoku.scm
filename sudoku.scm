@@ -92,7 +92,7 @@
                   (lambda (s) (string-index (vector-ref gr s) vl))
                   u))
               (cond [(zero? (length places)) #f]
-                    [(= (length places))
+                    [(= (length places) 1)
                       (assign gr (car places) vl)]
                     [else #t]))
             (vector-ref units ix))
@@ -101,7 +101,6 @@
 
 (define (assign gr ix vl)
   (define old (string-delete vl (vector-ref gr ix)))
-  ; (vector-set! gr ix (make-string 1 vl))
   (all?
     (lambda (vl) (eliminate gr ix vl))
     (string->list old)))
@@ -112,20 +111,13 @@
     str
     (string->list xxx)))
 
+; TODO(knorton): This shit has to exist. I just can't find it.
 (define (all? lmb lst)
   (if (null? lst)
     #t
     (if (lmb (car lst))
         (all? lmb (cdr lst))
         #f)))
-
-(define (for-each-with-index lmb lst)
-  (define (nop a b) '())
-  (define (each ix lmb lst)
-    (if (null? lst)
-      '()
-      (nop (lmb (car lst) ix) (each (add1 ix) lmb (cdr lst)))))
-  (each 0 lmb lst))
 
 (define (parse-grid g)
   (define gl
@@ -136,7 +128,7 @@
   (if (not (= (length gl) 81))
     #f
     (begin
-      (for-each-with-index
+      (for-each-indexed
         (lambda (x ix) (if x (assign gr ix x) #f))
         gl)
       gr)))
