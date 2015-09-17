@@ -84,12 +84,24 @@
                                     (lambda (x) (eliminate gr x (string-ref new-value 0)))
                                     (vector-ref peers ix))]
                 [else #t]))
-        (if ok #t #f) ;need to being working here
+        (if ok
+          (all?
+            (lambda (u)
+              (define places
+                (filter
+                  (lambda (s) (string-index (vector-ref gr s) vl))
+                  u))
+              (cond [(zero? (length places)) #f]
+                    [(= (length places))
+                      (assign gr (car places) vl)]
+                    [else #t]))
+            (vector-ref units ix))
+          #f)
       )))
 
 (define (assign gr ix vl)
   (define old (string-delete vl (vector-ref gr ix)))
-  (vector-set! gr ix (make-string 1 vl))
+  ; (vector-set! gr ix (make-string 1 vl))
   (all?
     (lambda (vl) (eliminate gr ix vl))
     (string->list old)))
