@@ -144,7 +144,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	if _, err := run(exec.Command(filepath.Join(root, "server"))); err != nil {
+	if _, err := run(exec.Command(filepath.Join(root, "sudoku-server"))); err != nil {
 		log.Panic(err)
 	}
 

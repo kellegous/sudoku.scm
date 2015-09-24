@@ -1,8 +1,9 @@
+(declare (unit sudoku))
+
 (require-extension srfi-1)
 (require-extension srfi-13)
 (require-extension srfi-69)
 (require-extension traversal)
-(require-extension json)
 
 ; Produce a list of integers from a to b exclusive, taking
 ; steps of s (default 1).
@@ -84,12 +85,12 @@
               ; return #f if the constraints are impossible
               (let ([ok (cond [(zero? new-length) #f]
                               [(= new-length 1)
-                                  (all?
+                                  (every
                                       (lambda (x) (eliminate gr x (string-ref new-value 0)))
                                       (vector-ref peers ix))]
                               [else #t])])
                 (if ok
-                  (all?
+                  (every
                     (lambda (u)
                       (let ([places (filter (lambda (s) (string-index (vector-ref gr s) vl)) u)])
                         (cond [(zero? (length places)) #f]
@@ -100,7 +101,7 @@
 
 (define (assign gr ix vl)
   (let ([old (string-delete vl (vector-ref gr ix))])
-    (all?
+    (every
       (lambda (vl) (eliminate gr ix vl))
       (string->list old))))
 
@@ -134,7 +135,7 @@
                       [else c])))
               #f
               gr))])
-            (if (all?
+            (if (every
                 (lambda (s) (= (string-length (vector-ref gr s)) 1))
                 squares)
                 gr
@@ -154,14 +155,6 @@
     (lambda (c s) (string-delete s c))
     str
     (string->list xxx)))
-
-; TODO(knorton): This shit has to exist. I just can't find it.
-(define (all? lmb lst)
-  (if (null? lst)
-    #t
-    (if (lmb (car lst))
-        (all? lmb (cdr lst))
-        #f)))
 
 (define (vector-copy ov)
   (let ([nv (make-vector (vector-length ov))])
@@ -185,12 +178,13 @@
           gl)
         gr))))
 
-(define (vector->hash-table v)
-  (let ([ht (make-hash-table)])
-    (begin
-      (for-each-vector
-        (lambda (p) (hash-table-set! ht (car p) (cdr p)))
-        v))))
+;; convert
+;(define (vector->hash-table v)
+;  (let ([ht (make-hash-table)])
+;    (begin
+;      (for-each-vector
+;        (lambda (p) (hash-table-set! ht (car p) (cdr p)))
+;        v))))
 
 (define example-grid-1 "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......")
 (define example-grid-2 ".26.39......6....19.....7.......4..9.5....2....85.....3..2..9..4....762.........4")
@@ -207,9 +201,3 @@
 ;        (if (not (equal? gr ex))
 ;          (display (format "~A wrong.\n Expected: ~A\n Got: ~A\n\n" g ex gr))))
 ;      data)))
-
-(for-each
-  (lambda (g)
-    (display (format "~A\n"
-      (search (parse-grid g)))))
-  (list example-grid-1 example-grid-2))
